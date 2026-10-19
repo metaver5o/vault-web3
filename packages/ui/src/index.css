@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1a1d27;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2d3e;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3a3d4e;
+  }
+}
+
+@layer components {
+  .vault-input {
+    @apply w-full bg-vault-bg border border-vault-border rounded px-3 py-2 text-sm text-vault-text
+           placeholder-vault-muted focus:outline-none focus:border-vault-accent transition-colors;
+  }
+
+  .vault-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium
+           transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .vault-btn-primary {
+    @apply vault-btn bg-vault-accent text-white hover:bg-vault-accent-dim;
+  }
+  .vault-btn-secondary {
+    @apply vault-btn bg-vault-surface border border-vault-border text-vault-text hover:border-vault-accent;
+  }
+  .vault-btn-danger {
+    @apply vault-btn bg-vault-red/10 border border-vault-red/30 text-vault-red hover:bg-vault-red/20;
+  }
+
+  .vault-card {
+    @apply bg-vault-surface border border-vault-border rounded-lg p-5;
+  }
+
+  .vault-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium;
+  }
+  .vault-badge-green  { @apply vault-badge bg-vault-green/10 text-vault-green; }
+  .vault-badge-red    { @apply vault-badge bg-vault-red/10 text-vault-red; }
+  .vault-badge-yellow { @apply vault-badge bg-vault-yellow/10 text-vault-yellow; }
+  .vault-badge-purple { @apply vault-badge bg-vault-purple/10 text-vault-purple; }
+  .vault-badge-teal   { @apply vault-badge bg-vault-accent/10 text-vault-accent; }
+  .vault-badge-muted  { @apply vault-badge bg-vault-border text-vault-muted; }
+}

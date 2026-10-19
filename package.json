@@ -1,0 +1,23 @@
+{
+  "name": "web3-vault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Decentralized secrets vault with Trezor hardware root of trust",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=packages/api",
+    "dev:ui": "npm run dev --workspace=packages/ui",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
+    "compile:contracts": "npm run compile --workspace=packages/contracts",
+    "deploy:contracts": "npm run deploy:local --workspace=packages/contracts"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

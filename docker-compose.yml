@@ -1,0 +1,133 @@
+version: "3.9"
+
+# web3-vault development stack
+#
+#   ipfs      — Kubo IPFS node (API :5001, Gateway :8080, Swarm :4001)
+#   hardhat   — Local Hardhat blockchain (RPC :8545, ChainID 31337)
+#   api       — web3-vault REST API (:8200, same default port as HashiCorp Vault)
+#
+# NOTE: The Trezor hardware wallet connects via USB bridge (trezord) which must
+# run on the host machine. The API service communicates with it via
+# TREZOR_BRIDGE_URL. Install: https://suite.trezor.io/web/bridge/
+
+name: web3-vault
+
+volumes:
+  ipfs_data:
+  ipfs_staging:
+  hardhat_data:
+
+networks:
+  vault:
+    driver: bridge
+
+services:
+  # ─── IPFS Node ──────────────────────────────────────────────────────────────
+  ipfs:
+    image: ipfs/kubo:v0.27.0
+    container_name: web3vault-ipfs
+    restart: unless-stopped
+    networks:
+      - vault
+    ports:
+      - "4001:4001"       # Swarm (P2P)
+      - "4001:4001/udp"   # Swarm UDP
+      - "5001:5001"       # API (internal — exposed for dev; restrict in prod)
+      - "8081:8080"       # Gateway (read-only)
+    volumes:
+      - ipfs_data:/data/ipfs
+      - ipfs_staging:/export
+    environment:
+      - IPFS_PROFILE=server
+    entrypoint: >
+      sh -c "ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[\"*\"]' &&
+             ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '[\"PUT\", \"POST\", \"GET\"]' &&
+             ipfs daemon --migrate=true --agent-version-suffix=web3-vault"
+    healthcheck:
+      test: ["CMD", "ipfs", "id"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ─── Local Blockchain (Hardhat) ─────────────────────────────────────────────
+  hardhat:
+    build:
+      context: .
+      dockerfile: docker/hardhat.Dockerfile
+    container_name: web3vault-hardhat
+    restart: unless-stopped
+    networks:
+      - vault
+    ports:
+      - "8545:8545"
+    volumes:
+      - hardhat_data:/app/deployments
+    environment:
+      - HARDHAT_NETWORK=hardhat
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8545", "--post-data",
+             '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}',
+             "--header", "Content-Type: application/json"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ─── web3-vault Web UI ──────────────────────────────────────────────────────
+  ui:
+    build:
+      context: .
+      dockerfile: docker/ui.Dockerfile
+    image: criptografia/web3-vault:latest
+    container_name: web3vault-ui
+    restart: unless-stopped
+    networks:
+      - vault
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://localhost:8200
+
+  # ─── web3-vault API ─────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: criptografia/web3-vault-api:latest
+    container_name: web3vault-api
+    restart: unless-stopped
+    networks:
+      - vault
+    ports:
+      - "8200:8200"
+    depends_on:
+      ipfs:
+        condition: service_healthy
+      hardhat:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=8200
+      - HOST=0.0.0.0
+      - IPFS_API_URL=http://ipfs:5001
+      - RPC_URL=http://hardhat:8545
+      - CHAIN_ID=31337
+      # Set REGISTRY_ADDRESS after deploying contracts:
+      #   docker exec vault-hardhat npx hardhat run scripts/deploy.ts --network localhost
+      - REGISTRY_ADDRESS=${REGISTRY_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - TREZOR_MANIFEST_EMAIL=${TREZOR_MANIFEST_EMAIL:-vault@local.dev}
+      - TREZOR_MANIFEST_URL=${TREZOR_MANIFEST_URL:-http://localhost:8200}
+      # Trezor Bridge runs on host machine — use host-gateway to reach it
+      - TREZOR_BRIDGE_URL=http://host-gateway:21325
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    extra_hosts:
+      - "host-gateway:host-gateway"  # Docker Desktop; use host.docker.internal on macOS
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8200/v1/web3/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

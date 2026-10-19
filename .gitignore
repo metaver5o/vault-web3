@@ -1,0 +1,10 @@
+node_modules/
+dist/
+packages/contracts/artifacts/
+packages/contracts/cache/
+packages/contracts/typechain-types/
+.env
+.env.*
+.claude/
+.DS_Store
+*.log

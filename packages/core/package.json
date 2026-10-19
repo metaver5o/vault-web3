@@ -1,0 +1,26 @@
+{
+  "name": "@web3-vault/core",
+  "version": "0.1.0",
+  "description": "Core cryptography, Trezor integration, and IPFS storage for vault-web3",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@trezor/connect": "^9.7.0",
+    "ethers": "^6.13.0",
+    "kubo-rpc-client": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+}
