@@ -30,7 +30,7 @@ jobs:
       - run: npm run build --workspace=packages/core
       - run: npm run build --workspace=packages/ui
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: /   # served at the root of vault.criptografia.app
       # Pages has no SPA fallback: serve the app for deep links like /secrets too.
       - run: cp packages/ui/dist/index.html packages/ui/dist/404.html
       - uses: actions/configure-pages@v5
