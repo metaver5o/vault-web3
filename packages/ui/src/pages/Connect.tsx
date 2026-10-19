@@ -246,20 +246,12 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, er
             CRIPTOGRAFIA <ExternalLink className="w-3 h-3" />
           </a>
           <a
-            href="https://github.com/criptografia-app/vault-web3"
+            href="https://github.com/metaver5o/vault-web3"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-vault-accent flex items-center gap-1 transition-colors"
           >
             GitHub <ExternalLink className="w-3 h-3" />
-          </a>
-          <a
-            href="https://hub.docker.com/r/criptografia/vault-web3"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-vault-accent flex items-center gap-1 transition-colors font-mono"
-          >
-            criptografia/vault-web3 <ExternalLink className="w-3 h-3" />
           </a>
         </div>
       </div>

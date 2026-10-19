@@ -182,7 +182,7 @@ export function AccessControlPage({ vault }: AccessControlProps) {
                     owner: "Full control: grant/revoke all roles, delete secrets",
                     admin: "Write secrets + grant reader/writer roles",
                     writer: "Create and update secrets on scoped paths",
-                    reader: "Read-only access to decrypted secrets",
+                    reader: "Listed as a reader on-chain; decrypting still needs the KEK",
                   }[r]}
                 </span>
               </div>
