@@ -11,13 +11,14 @@ import { AuditLogPage } from "./pages/AuditLog.tsx";
 import { AccessControlPage } from "./pages/AccessControl.tsx";
 import { SettingsPage } from "./pages/Settings.tsx";
 import { EnginesPage } from "./pages/Engines.tsx";
-import { loadConfig } from "./store/config.ts";
+import { effectiveConfig } from "./store/config.ts";
+import { NetworkBar } from "./components/NetworkBar.tsx";
 
 export default function App() {
-  const { signer, address, signerType, connecting, error, howto, walletAvailable,
+  const { signer, address, signerType, connecting, error, howto, walletAvailable, chainId,
     connectMetaMask, connectTrezor, connectYubiKey, forgetYubiKey, disconnect } = useSigner();
-  const vault = useVault(signer);
-  const cfg = loadConfig();
+  const vault = useVault(signer, chainId ?? null);
+  const cfg = effectiveConfig(chainId);
 
   // Not connected — show connect screen
   if (!address) {
@@ -43,6 +44,7 @@ export default function App() {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <StatusBar address={address} signerType={signerType} chainId={cfg.chainId} />
+        <NetworkBar chainId={chainId ?? null} walletBacked={signerType === "metamask" || signerType === "yubikey"} />
         <main className="flex-1 flex overflow-hidden">
           <Routes>
             <Route path="/" element={<Navigate to="/secrets" replace />} />

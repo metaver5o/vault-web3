@@ -143,6 +143,42 @@ describe("VaultRegistry Diamond", () => {
     });
   });
 
+  describe("Claiming paths (shared deployment)", () => {
+    const CID = "bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy";
+    const HASH = ethers.keccak256(ethers.toUtf8Bytes("h"));
+
+    it("first write to an unclaimed path claims it", async () => {
+      const P = "secret/bob/api";
+      await expect(registry.connect(bob).recordSecretVersion(P, CID, HASH))
+        .to.emit(registry, "PathClaimed").withArgs(P, P, await bob.getAddress());
+      expect(await registry.getPathOwner(P)).to.equal(await bob.getAddress());
+      expect(await access.hasRole(P, await bob.getAddress(), 0)).to.equal(true);
+    });
+
+    it("the claimer can keep writing", async () => {
+      await registry.connect(bob).recordSecretVersion("secret/bob/api", CID, HASH);
+      expect(await registry.getLatestVersion("secret/bob/api")).to.equal(2n);
+    });
+
+    it("nobody else can write to a claimed path", async () => {
+      await expect(registry.connect(alice).recordSecretVersion("secret/bob/api", CID, HASH))
+        .to.be.revertedWith("VaultRegistry: caller lacks Writer role");
+    });
+
+    it("the claimer can grant writers on their path", async () => {
+      await access.connect(bob).grantRole("secret/bob/api", await alice.getAddress(), 2, 0, false);
+      await registry.connect(alice).recordSecretVersion("secret/bob/api", CID, HASH);
+      expect(await registry.getLatestVersion("secret/bob/api")).to.equal(3n);
+    });
+
+    it("a path an admin set up roles on can't be claimed by a stranger", async () => {
+      const P = "secret/team/db";
+      await access.connect(owner).grantRole(P, await alice.getAddress(), 2, 0, false);
+      await expect(registry.connect(bob).recordSecretVersion(P, CID, HASH))
+        .to.be.revertedWith("VaultRegistry: caller lacks Writer role");
+    });
+  });
+
   describe("AuditFacet", () => {
     const PATH = "secret/test/myapp";
 

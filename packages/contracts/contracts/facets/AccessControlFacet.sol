@@ -90,6 +90,8 @@ contract AccessControlFacet {
 
         LibVaultStorage.VaultStorage storage vs = LibVaultStorage.getStorage();
         bytes32 key = LibVaultStorage.pathKey(path);
+        // A path someone set up roles on is no longer open to claim by a first write.
+        if (vs.pathCreator[key] == address(0)) vs.pathCreator[key] = msg.sender;
 
         vs.policies[key][grantee] = LibVaultStorage.PolicyEntry({
             role: role,

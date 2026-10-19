@@ -14,7 +14,7 @@ export function SettingsPage() {
   }
 
   function save() {
-    saveConfig(cfg);
+    saveConfig({ ...cfg, networkMode: "custom" });   // hand-edited values win over the wallet's network
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }

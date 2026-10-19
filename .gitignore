@@ -8,3 +8,5 @@ packages/contracts/typechain-types/
 .claude/
 .DS_Store
 *.log
+.wrangler/
+.dev.vars

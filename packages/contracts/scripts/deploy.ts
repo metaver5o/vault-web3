@@ -3,10 +3,16 @@
  *
  * Usage:
  *   npx hardhat run scripts/deploy.ts --network localhost
- *   npx hardhat run scripts/deploy.ts --network zksync
+ *   npx hardhat run scripts/deploy.ts --network baseSepolia
+ *   npx hardhat run scripts/deploy.ts --network base
+ *
+ * Public networks are recorded in packages/ui/src/deployments.json, which the
+ * hosted UI reads to find the registry for whatever chain the wallet is on.
  */
 
-import { ethers } from "hardhat";
+import fs from "fs";
+import path from "path";
+import { ethers, network } from "hardhat";
 import { getSelectors, FacetCutAction } from "./helpers/diamond";
 
 async function main() {
@@ -75,6 +81,21 @@ async function main() {
   for (const addr of registeredFacets) {
     const selectors = await loupe.facetFunctionSelectors(addr);
     console.log(`  ${addr}: ${selectors.length} functions`);
+  }
+
+  const chainId = Number((await ethers.provider.getNetwork()).chainId);
+  if (chainId !== 31337) {
+    const file = path.join(__dirname, "../../ui/src/deployments.json");
+    const all = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
+    all[chainId] = {
+      network: network.name,
+      registry: diamondAddress,
+      owner: deployer.address,
+      block: await ethers.provider.getBlockNumber(),
+      deployedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(file, JSON.stringify(all, null, 2) + "\n");
+    console.log(`Recorded in ${path.relative(process.cwd(), file)}`);
   }
 
   console.log("\n=== Deployment Complete ===");

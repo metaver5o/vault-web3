@@ -75,6 +75,9 @@ library LibVaultStorage {
         address[] globalSigners;
         // Paused flag for emergency stop
         bool paused;
+        // path => who claimed it (first writer, or the admin who first granted a role on it).
+        // Appended last so existing storage slots don't move.
+        mapping(bytes32 => address) pathCreator;
     }
 
     function getStorage() internal pure returns (VaultStorage storage vs) {

@@ -1,5 +1,12 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, vars } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+
+// Deployer key for public networks: `npx hardhat vars set DEPLOYER_PRIVATE_KEY`
+// (stored in Hardhat's own config dir, not in this repo or your shell history).
+// DEPLOYER_PRIVATE_KEY in the environment works too.
+const deployer = vars.has("DEPLOYER_PRIVATE_KEY")
+  ? [vars.get("DEPLOYER_PRIVATE_KEY")]
+  : process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [];
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -16,6 +23,16 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
+    },
+    baseSepolia: {
+      url: process.env.BASE_SEPOLIA_RPC_URL ?? "https://sepolia.base.org",
+      chainId: 84532,
+      accounts: deployer,
+    },
+    base: {
+      url: process.env.BASE_RPC_URL ?? "https://mainnet.base.org",
+      chainId: 8453,
+      accounts: deployer,
     },
     zksync: {
       url: process.env.ZKSYNC_RPC_URL ?? "https://mainnet.era.zksync.io",

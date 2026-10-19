@@ -12,7 +12,11 @@ import {LibDiamond} from "../diamond/LibDiamond.sol";
  * storage level. Tombstones are represented as a new version with a sentinel
  * CID ("deleted").
  *
- * Access control: caller must have at least Writer role for the path.
+ * Access control: caller must have at least Writer role for the path, or the
+ * path must be unclaimed. The first write to an unclaimed path claims it: the
+ * writer becomes its Owner and can grant roles to others. That lets anyone use
+ * a shared deployment without the diamond owner handing out roles, while nobody
+ * can overwrite someone else's path.
  *
  * GAS NOTE: String storage is expensive on mainnet. For production L1 deployment,
  * consider emitting the CID as an event only (off-chain indexer picks it up)
@@ -31,15 +35,19 @@ contract VaultRegistryFacet {
         uint256 timestamp
     );
 
+    event PathClaimed(string indexed pathIndexed, string path, address owner);
+
     modifier notPaused() {
         require(!LibVaultStorage.getStorage().paused, "VaultRegistry: paused");
         _;
     }
 
     modifier onlyWriter(string calldata path) {
+        LibVaultStorage.VaultStorage storage vs = LibVaultStorage.getStorage();
         require(
             msg.sender == LibDiamond.contractOwner() ||
-            LibVaultStorage.hasRole(LibVaultStorage.getStorage(), path, msg.sender, LibVaultStorage.Role.Writer),
+            LibVaultStorage.hasRole(vs, path, msg.sender, LibVaultStorage.Role.Writer) ||
+            vs.pathCreator[LibVaultStorage.pathKey(path)] == address(0),
             "VaultRegistry: caller lacks Writer role"
         );
         _;
@@ -65,6 +73,19 @@ contract VaultRegistryFacet {
         LibVaultStorage.VaultStorage storage vs = LibVaultStorage.getStorage();
         bytes32 key = LibVaultStorage.pathKey(path);
 
+        // First write to an unclaimed path: the writer becomes its Owner.
+        if (vs.pathCreator[key] == address(0)) {
+            vs.pathCreator[key] = msg.sender;
+            vs.policies[key][msg.sender] = LibVaultStorage.PolicyEntry({
+                role: LibVaultStorage.Role.Owner,
+                grantee: msg.sender,
+                expiresAt: 0,
+                multiSigRequired: false,
+                exists: true
+            });
+            emit PathClaimed(path, path, msg.sender);
+        }
+
         newVersion = vs.latestVersion[key] + 1;
         vs.latestVersion[key] = newVersion;
 
@@ -86,6 +107,13 @@ contract VaultRegistryFacet {
         }));
 
         emit SecretVersionRecorded(path, path, newVersion, cid, msg.sender, block.timestamp);
+    }
+
+    /**
+     * @notice Who claimed a path (address(0) if nobody has yet).
+     */
+    function getPathOwner(string calldata path) external view returns (address) {
+        return LibVaultStorage.getStorage().pathCreator[LibVaultStorage.pathKey(path)];
     }
 
     /**

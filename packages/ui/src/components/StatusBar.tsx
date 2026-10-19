@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Wifi, WifiOff, Circle } from "lucide-react";
 import clsx from "clsx";
+import { networkName } from "../store/networks.ts";
 import { checkQSHaaSStatus } from "@vault-web3/core";
 import { loadConfig } from "../store/config.ts";
 
@@ -29,7 +30,7 @@ export function StatusBar({ address, signerType, chainId }: StatusBarProps) {
           "w-2 h-2 fill-current",
           address ? "text-vault-green" : "text-vault-muted"
         )} />
-        {address ? `Chain ${chainId ?? "?"}` : "Disconnected"}
+        {address ? networkName(chainId) : "Disconnected"}
       </span>
 
       {/* Signer */}

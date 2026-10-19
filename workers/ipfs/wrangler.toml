@@ -1,0 +1,18 @@
+# ipfs.criptografia.app: IPFS endpoint for the hosted vault (pins to Pinata).
+# Deploy:  npx wrangler deploy        Secret:  npx wrangler secret put PINATA_JWT
+name = "vault-web3-ipfs"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+routes = [{ pattern = "ipfs.criptografia.app", custom_domain = true }]
+
+[vars]
+ALLOWED_ORIGINS = "https://vault.criptografia.app"
+MAX_BYTES = "65536"
+# Optional: your dedicated Pinata gateway (faster, not rate-limited), e.g. "https://<name>.mypinata.cloud"
+# GATEWAY = ""
+
+# 20 envelope writes per minute per IP.
+[[ratelimits]]
+name = "ADD_LIMIT"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }

@@ -23,6 +23,12 @@ export interface SignerState {
   /** Step-by-step fix when the error is a hardware key that isn't ready. */
   howto?: string | null;
   walletAvailable: "metamask" | "other-eip1193" | "none";
+  /** The wallet's current chain (null before connecting or without a wallet). */
+  chainId?: number | null;
+}
+
+async function walletChainId(): Promise<number | null> {
+  try { return parseInt(String(await window.ethereum?.request({ method: "eth_chainId" })), 16) || null; } catch { return null; }
 }
 
 export function useSigner() {
@@ -44,41 +50,15 @@ export function useSigner() {
   }, []);
 
   const connectMetaMask = useCallback(async () => {
-    setState((s) => ({ ...s, connecting: true, error: null }));
+    setState((s) => ({ ...s, connecting: true, error: null, howto: null }));
     try {
-      const cfg = loadConfig();
-      const vault = new MetaMaskVault(cfg.chainId);
+      const chainId = await walletChainId();
+      const vault = new MetaMaskVault(chainId ?? loadConfig().chainId);
       const address = await vault.getAddress();
-      setState({
-        signer: vault,
-        address,
-        signerType: "metamask",
-        connecting: false,
-        error: null,
-        walletAvailable: detectWallet(),
-      });
-
-      // React to account/chain changes
-      vault.onAccountChange((newAddr) => {
-        setState((s) => ({ ...s, address: newAddr }));
-      });
-      vault.onChainChange((_chainId) => {
-        // Chain changed — reset connection and ask user to reconnect
-        setState((s) => ({
-          ...s,
-          signer: null,
-          address: null,
-          signerType: null,
-          error: "Chain changed — please reconnect.",
-        }));
-        vault.dispose();
-      });
+      setState({ signer: vault, address, signerType: "metamask", connecting: false, error: null, howto: null, chainId, walletAvailable: detectWallet() });
+      vault.onAccountChange((newAddr) => setState((s) => ({ ...s, address: newAddr })));
     } catch (err: unknown) {
-      setState((s) => ({
-        ...s,
-        connecting: false,
-        error: (err as Error).message,
-      }));
+      setState((s) => ({ ...s, connecting: false, error: (err as Error).message }));
     }
   }, []);
 
@@ -112,6 +92,30 @@ export function useSigner() {
     }
   }, []);
 
+  // Network switches: rebuild the wallet-backed signer on the new chain instead of disconnecting.
+  useEffect(() => {
+    const eth = window.ethereum;
+    if (!eth) return;
+    const onChain = async (hex: unknown) => {
+      const chainId = parseInt(String(hex), 16);
+      const cred: YubiKeyCredential | null = JSON.parse(localStorage.getItem(YUBIKEY_KEY) ?? "null");
+      setState((s) => {
+        if (s.signerType === "metamask") {
+          s.signer?.dispose();
+          const vault = new MetaMaskVault(chainId);
+          return { ...s, chainId, signer: vault };
+        }
+        return { ...s, chainId };
+      });
+      if (cred) {
+        const wallet = await new MetaMaskVault(chainId).getEthersSigner().catch(() => null);
+        setState((s) => (s.signerType === "yubikey" && wallet ? { ...s, signer: new YubiKeyVault(cred, wallet) } : s));
+      }
+    };
+    eth.on("chainChanged", onChain);
+    return () => eth.removeListener("chainChanged", onChain);
+  }, []);
+
   // YubiKey: secrets are keyed from the key's PRF; a browser wallet signs the registry transactions.
   const connectYubiKey = useCallback(async () => {
     setState((s) => ({ ...s, connecting: true, error: null, howto: null }));
@@ -125,10 +129,11 @@ export function useSigner() {
         cred = await registerYubiKey({ userName: "vault-web3" });
         localStorage.setItem(YUBIKEY_KEY, JSON.stringify(cred));
       }
-      const wallet = await new MetaMaskVault(loadConfig().chainId).getEthersSigner();
+      const chainId = await walletChainId();
+      const wallet = await new MetaMaskVault(chainId ?? loadConfig().chainId).getEthersSigner();
       const vault = new YubiKeyVault(cred, wallet);
       await vault.prf("vault-web3/connect-check");   // one touch now, so a key that isn't ready fails here with a how-to
-      setState({ signer: vault, address: await vault.getAddress(), signerType: "yubikey", connecting: false, error: null, howto: null, walletAvailable: detectWallet() });
+      setState({ signer: vault, address: await vault.getAddress(), signerType: "yubikey", connecting: false, error: null, howto: null, chainId, walletAvailable: detectWallet() });
     } catch (err: unknown) {
       const e = err instanceof YubiKeyNotReady ? err : (err as { name?: string })?.name ? explainWebAuthnError(err) : null;
       setState((s) => ({ ...s, connecting: false, error: e ? e.message : (err as Error).message, howto: e?.howto ?? null }));

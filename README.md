@@ -5,7 +5,7 @@
 Replaces HashiCorp Vault's seal/unseal mechanism with a hardware key: a Trezor or a YubiKey.
 No central server. No root token. No cloud dependency.
 
-**Try the UI:** [vault.criptografia.app](https://vault.criptografia.app). It's only the client: everything runs in your browser, and you point it at your own chain and IPFS node in Settings. Trezor needs the vault running locally (see Quickstart); YubiKey and MetaMask work on the hosted page.
+**Try the UI:** [vault.criptografia.app](https://vault.criptografia.app). It runs in your browser and follows your wallet's network: Base Sepolia to try it for free, Base for real use. Envelopes are encrypted before they leave the browser and pinned to IPFS through `ipfs.criptografia.app`. The first wallet to write a path owns it. Trezor needs the vault running locally (see Quickstart); YubiKey and MetaMask work on the hosted page. How it's deployed: [docs/deploy.md](docs/deploy.md).
 
 ## See it work
 
