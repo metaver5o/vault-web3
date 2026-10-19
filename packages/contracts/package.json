@@ -1,5 +1,5 @@
 {
-  "name": "@web3-vault/contracts",
+  "name": "@vault-web3/contracts",
   "version": "0.1.0",
   "description": "Vault-web3 smart contracts — ERC-2535 Diamond access control registry",
   "license": "MIT",

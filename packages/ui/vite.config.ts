@@ -5,7 +5,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 export default defineConfig({
   plugins: [
     nodePolyfills({
-      // Polyfill Node.js crypto used in @web3-vault/core
+      // Polyfill Node.js crypto used in @vault-web3/core
       include: ["crypto", "buffer", "stream", "util"],
       globals: {
         Buffer: true,

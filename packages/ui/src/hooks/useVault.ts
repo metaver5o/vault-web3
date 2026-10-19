@@ -5,8 +5,8 @@
  */
 
 import { useState, useEffect } from "react";
-import { VaultClient } from "@web3-vault/core";
-import type { VaultSigner } from "@web3-vault/core";
+import { VaultClient } from "@vault-web3/core";
+import type { VaultSigner } from "@vault-web3/core";
 import { loadConfig } from "../store/config.ts";
 
 function buildClient(signer: VaultSigner): VaultClient | null {

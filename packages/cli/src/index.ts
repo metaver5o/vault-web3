@@ -17,7 +17,7 @@
 
 import { Command } from "commander";
 import ora from "ora";
-import { VaultClient } from "@web3-vault/core";
+import { VaultClient } from "@vault-web3/core";
 import { getConfig, setConfig, getConfigPath } from "./config.js";
 import {
   printSuccess,

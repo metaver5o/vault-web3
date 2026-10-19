@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Settings as SettingsIcon, CheckCircle, ExternalLink, Wifi, WifiOff, AlertCircle } from "lucide-react";
 import { QuantumSeedField } from "../components/QuantumSeedField.tsx";
 import { loadConfig, saveConfig, type UIConfig } from "../store/config.ts";
-import { checkQSHaaSStatus } from "@web3-vault/core";
+import { checkQSHaaSStatus } from "@vault-web3/core";
 
 export function SettingsPage() {
   const [cfg, setCfg] = useState<UIConfig>(loadConfig);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScrollText, Search, RefreshCw, CheckCircle, XCircle } from "lucide-react";
-import type { VaultClient } from "@web3-vault/core";
+import type { VaultClient } from "@vault-web3/core";
 
 interface AuditLogProps {
   vault: VaultClient | null;

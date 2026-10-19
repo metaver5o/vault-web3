@@ -5,7 +5,7 @@ import {
   Clock, Hash, RefreshCw, AlertCircle
 } from "lucide-react";
 import clsx from "clsx";
-import type { VaultClient, SecretVersionEntry } from "@web3-vault/core";
+import type { VaultClient, SecretVersionEntry } from "@vault-web3/core";
 import { loadConfig } from "../store/config.ts";
 
 interface SecretsExplorerProps {

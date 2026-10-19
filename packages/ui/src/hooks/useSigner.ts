@@ -4,8 +4,8 @@
  */
 
 import { useState, useCallback, useEffect } from "react";
-import { MetaMaskVault, TrezorVault, detectWallet } from "@web3-vault/core";
-import type { VaultSigner } from "@web3-vault/core";
+import { MetaMaskVault, TrezorVault, detectWallet } from "@vault-web3/core";
+import type { VaultSigner } from "@vault-web3/core";
 import { loadConfig } from "../store/config.ts";
 
 export interface SignerState {

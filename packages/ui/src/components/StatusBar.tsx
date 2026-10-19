@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Wifi, WifiOff, Circle } from "lucide-react";
 import clsx from "clsx";
-import { checkQSHaaSStatus } from "@web3-vault/core";
+import { checkQSHaaSStatus } from "@vault-web3/core";
 import { loadConfig } from "../store/config.ts";
 
 interface StatusBarProps {

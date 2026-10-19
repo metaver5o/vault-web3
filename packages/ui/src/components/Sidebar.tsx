@@ -30,7 +30,7 @@ export function Sidebar({ signerState, onDisconnect }: SidebarProps) {
           <Shield className="w-4 h-4 text-vault-accent" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-vault-text">web3-vault</div>
+          <div className="text-sm font-semibold text-vault-text">vault-web3</div>
           <a
             href="https://www.criptografia.app"
             target="_blank"

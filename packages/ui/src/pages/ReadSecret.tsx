@@ -4,7 +4,7 @@ import {
   Eye, EyeOff, Copy, ArrowLeft, Loader2,
   AlertCircle, Clock, Hash, User, ExternalLink, History, Settings
 } from "lucide-react";
-import type { VaultClient, ReadSecretResponse, SecretVersionEntry } from "@web3-vault/core";
+import type { VaultClient, ReadSecretResponse, SecretVersionEntry } from "@vault-web3/core";
 
 interface ReadSecretProps {
   vault: VaultClient | null;

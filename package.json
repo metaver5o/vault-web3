@@ -1,5 +1,5 @@
 {
-  "name": "web3-vault",
+  "name": "vault-web3",
   "version": "0.1.0",
   "private": true,
   "description": "Decentralized secrets vault with Trezor hardware root of trust",

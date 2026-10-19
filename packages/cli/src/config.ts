@@ -4,7 +4,7 @@
  */
 
 import Conf from "conf";
-import type { VaultConfig } from "@web3-vault/core";
+import type { VaultConfig } from "@vault-web3/core";
 
 export interface CLIConfig extends VaultConfig {
   defaultNamespace: string;

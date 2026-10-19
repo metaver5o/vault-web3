@@ -1,16 +1,16 @@
 version: "3.9"
 
-# web3-vault development stack
+# vault-web3 development stack
 #
 #   ipfs      — Kubo IPFS node (API :5001, Gateway :8080, Swarm :4001)
 #   hardhat   — Local Hardhat blockchain (RPC :8545, ChainID 31337)
-#   api       — web3-vault REST API (:8200, same default port as HashiCorp Vault)
+#   api       — vault-web3 REST API (:8200, same default port as HashiCorp Vault)
 #
 # NOTE: The Trezor hardware wallet connects via USB bridge (trezord) which must
 # run on the host machine. The API service communicates with it via
 # TREZOR_BRIDGE_URL. Install: https://suite.trezor.io/web/bridge/
 
-name: web3-vault
+name: vault-web3
 
 volumes:
   ipfs_data:
@@ -42,7 +42,7 @@ services:
     entrypoint: >
       sh -c "ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[\"*\"]' &&
              ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '[\"PUT\", \"POST\", \"GET\"]' &&
-             ipfs daemon --migrate=true --agent-version-suffix=web3-vault"
+             ipfs daemon --migrate=true --agent-version-suffix=vault-web3"
     healthcheck:
       test: ["CMD", "ipfs", "id"]
       interval: 30s
@@ -74,12 +74,12 @@ services:
       retries: 5
       start_period: 5s
 
-  # ─── web3-vault Web UI ──────────────────────────────────────────────────────
+  # ─── vault-web3 Web UI ──────────────────────────────────────────────────────
   ui:
     build:
       context: .
       dockerfile: docker/ui.Dockerfile
-    image: criptografia/web3-vault:latest
+    image: criptografia/vault-web3:latest
     container_name: web3vault-ui
     restart: unless-stopped
     networks:
@@ -91,12 +91,12 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8200
 
-  # ─── web3-vault API ─────────────────────────────────────────────────────────
+  # ─── vault-web3 API ─────────────────────────────────────────────────────────
   api:
     build:
       context: .
       dockerfile: docker/api.Dockerfile
-    image: criptografia/web3-vault-api:latest
+    image: criptografia/vault-web3-api:latest
     container_name: web3vault-api
     restart: unless-stopped
     networks:

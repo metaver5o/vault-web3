@@ -1,5 +1,5 @@
 {
-  "name": "@web3-vault/api",
+  "name": "@vault-web3/api",
   "version": "0.1.0",
   "description": "HashiCorp Vault KV v2-compatible REST API for vault-web3",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@web3-vault/core": "*",
+    "@vault-web3/core": "*",
     "fastify": "^5.0.0",
     "@fastify/cors": "^11.0.0",
     "@fastify/helmet": "^13.0.0",

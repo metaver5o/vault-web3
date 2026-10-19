@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Users, Plus, Trash2, Loader2, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import type { VaultClient } from "@web3-vault/core";
+import type { VaultClient } from "@vault-web3/core";
 
 interface AccessControlProps {
   vault: VaultClient | null;

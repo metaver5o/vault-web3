@@ -85,7 +85,7 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, er
                           flex items-center justify-center mx-auto">
             <Shield className="w-8 h-8 text-vault-accent" />
           </div>
-          <h1 className="text-2xl font-semibold text-vault-text">web3-vault</h1>
+          <h1 className="text-2xl font-semibold text-vault-text">vault-web3</h1>
           <a
             href="https://www.criptografia.app"
             target="_blank"
@@ -254,12 +254,12 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, er
             GitHub <ExternalLink className="w-3 h-3" />
           </a>
           <a
-            href="https://hub.docker.com/r/criptografia/web3-vault"
+            href="https://hub.docker.com/r/criptografia/vault-web3"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-vault-accent flex items-center gap-1 transition-colors font-mono"
           >
-            criptografia/web3-vault <ExternalLink className="w-3 h-3" />
+            criptografia/vault-web3 <ExternalLink className="w-3 h-3" />
           </a>
         </div>
       </div>

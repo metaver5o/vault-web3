@@ -20,8 +20,8 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import { z } from "zod";
-import { VaultClient } from "@web3-vault/core";
-import type { VaultConfig } from "@web3-vault/core";
+import { VaultClient } from "@vault-web3/core";
+import type { VaultConfig } from "@vault-web3/core";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 

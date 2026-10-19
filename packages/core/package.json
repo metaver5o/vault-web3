@@ -1,5 +1,5 @@
 {
-  "name": "@web3-vault/core",
+  "name": "@vault-web3/core",
   "version": "0.1.0",
   "description": "Core cryptography, Trezor integration, and IPFS storage for vault-web3",
   "license": "MIT",

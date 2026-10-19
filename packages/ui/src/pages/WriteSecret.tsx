@@ -4,7 +4,7 @@ import {
   Plus, Trash2, CheckCircle, AlertCircle,
   ArrowLeft, Loader2, Copy, Settings
 } from "lucide-react";
-import type { VaultClient } from "@web3-vault/core";
+import type { VaultClient } from "@vault-web3/core";
 import { QuantumSeedField } from "../components/QuantumSeedField.tsx";
 import { loadConfig, patchConfig } from "../store/config.ts";
 
