@@ -15,7 +15,8 @@
     "dev:ui": "npm run dev --workspace=packages/ui",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
     "compile:contracts": "npm run compile --workspace=packages/contracts",
-    "deploy:contracts": "npm run deploy:local --workspace=packages/contracts"
+    "deploy:contracts": "npm run deploy:local --workspace=packages/contracts",
+    "e2e": "node e2e/e2e.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

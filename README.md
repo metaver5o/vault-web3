@@ -142,6 +142,15 @@ const keys = await vault.deriveThresholdKEK(
 );
 ```
 
+### End-to-end check
+
+With the stack up and the contracts deployed, this writes, reads, rotates and audits a secret against the real chain and IPFS node. A software key stands in for the Trezor and signs the same message the device would:
+
+```bash
+npm run build
+REGISTRY=0x<diamond address> npm run e2e
+```
+
 ## License
 
 MIT
