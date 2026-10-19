@@ -71,7 +71,7 @@ export function Sidebar({ signerState, onDisconnect }: SidebarProps) {
             <div className="flex items-center gap-2">
               <div className={clsx(
                 "w-2 h-2 rounded-full",
-                signerType === "metamask" ? "bg-vault-yellow" : "bg-vault-green"
+                signerType === "metamask" ? "bg-vault-yellow" : signerType === "yubikey" ? "bg-vault-accent" : "bg-vault-green"
               )} />
               <span className="text-xs text-vault-muted capitalize">{signerType}</span>
             </div>

@@ -14,8 +14,8 @@ import { EnginesPage } from "./pages/Engines.tsx";
 import { loadConfig } from "./store/config.ts";
 
 export default function App() {
-  const { signer, address, signerType, connecting, error, walletAvailable,
-    connectMetaMask, connectTrezor, disconnect } = useSigner();
+  const { signer, address, signerType, connecting, error, howto, walletAvailable,
+    connectMetaMask, connectTrezor, connectYubiKey, forgetYubiKey, disconnect } = useSigner();
   const vault = useVault(signer);
   const cfg = loadConfig();
 
@@ -25,8 +25,11 @@ export default function App() {
       <ConnectPage
         onConnectMetaMask={connectMetaMask}
         onConnectTrezor={connectTrezor}
+        onConnectYubiKey={connectYubiKey}
+        onForgetYubiKey={forgetYubiKey}
         connecting={connecting}
         error={error}
+        howto={howto}
         walletAvailable={walletAvailable}
       />
     );

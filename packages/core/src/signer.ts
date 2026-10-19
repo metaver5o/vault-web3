@@ -37,7 +37,7 @@ export interface VaultSigner {
   getEthersSigner(provider?: ethers.Provider): Promise<ethers.Signer>;
 
   /** Signer type identifier — used for UI labeling and config serialization. */
-  readonly signerType: "trezor" | "metamask";
+  readonly signerType: "trezor" | "metamask" | "yubikey";
 
   /** Release resources (TrezorConnect.dispose, etc). No-op for MetaMask. */
   dispose(): void;

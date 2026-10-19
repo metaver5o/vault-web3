@@ -16,10 +16,14 @@
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
     "compile:contracts": "npm run compile --workspace=packages/contracts",
     "deploy:contracts": "npm run deploy:local --workspace=packages/contracts",
-    "e2e": "node e2e/e2e.mjs"
+    "e2e": "node e2e/e2e.mjs",
+    "e2e:yubikey": "node e2e/yubikey.browser.mjs"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^23.11.1"
   }
 }

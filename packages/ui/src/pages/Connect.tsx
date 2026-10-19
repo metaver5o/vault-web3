@@ -1,4 +1,5 @@
-import { Shield, Wallet, HardDrive, ExternalLink, AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Shield, Wallet, HardDrive, KeyRound, ExternalLink, AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { hasRegisteredYubiKey } from "../hooks/useSigner.ts";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 
@@ -64,12 +65,20 @@ function useTrezorBridge() {
 interface ConnectProps {
   onConnectMetaMask: () => void;
   onConnectTrezor: () => void;
+  onConnectYubiKey: () => void;
+  onForgetYubiKey: () => void;
   connecting: boolean;
   error: string | null;
+  howto?: string | null;
   walletAvailable: "metamask" | "other-eip1193" | "none";
 }
 
-export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, error, walletAvailable }: ConnectProps) {
+const YUBIKEY_DOC = "https://github.com/metaver5o/vault-web3/blob/main/docs/yubikey.md";
+const webauthnAvailable = () => typeof window !== "undefined" && "PublicKeyCredential" in window && window.isSecureContext;
+
+export function ConnectPage({ onConnectMetaMask, onConnectTrezor, onConnectYubiKey, onForgetYubiKey, connecting, error, howto, walletAvailable }: ConnectProps) {
+  const [yubiRegistered, setYubiRegistered] = useState(hasRegisteredYubiKey());
+  const yubiUsable = webauthnAvailable() && walletAvailable !== "none";
   const { status: bridgeStatus, info: bridgeInfo } = useTrezorBridge();
 
   const trezorReady = bridgeStatus === "ready" && !connecting;
@@ -103,9 +112,19 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, er
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-vault-red/10 border border-vault-red/20">
+          <div id="connect-error" className="flex items-start gap-3 p-4 rounded-lg bg-vault-red/10 border border-vault-red/20">
             <AlertCircle className="w-4 h-4 text-vault-red mt-0.5 shrink-0" />
-            <p className="text-sm text-vault-red">{error}</p>
+            <div className="space-y-2">
+              <p className="text-sm text-vault-red">{error}</p>
+              {howto && howto !== error && (
+                <p className="text-xs text-vault-text leading-relaxed"><span className="font-semibold">How to fix: </span>{howto}</p>
+              )}
+              {howto && (
+                <a href={YUBIKEY_DOC} target="_blank" rel="noopener noreferrer" className="text-xs text-vault-accent hover:underline inline-flex items-center gap-1">
+                  YubiKey setup guide <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
         )}
 
@@ -232,6 +251,50 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, connecting, er
               )}
             </div>
           </button>
+
+          {/* ── YubiKey ── */}
+          <button
+            id="btn-connect-yubikey"
+            onClick={() => { onConnectYubiKey(); setTimeout(() => setYubiRegistered(hasRegisteredYubiKey()), 1500); }}
+            disabled={connecting || !yubiUsable}
+            className={clsx(
+              "w-full vault-card text-left transition-all duration-150",
+              yubiUsable ? "hover:border-vault-accent cursor-pointer" : "opacity-60 cursor-not-allowed"
+            )}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-vault-accent/10 flex items-center justify-center shrink-0">
+                <KeyRound className="w-5 h-5 text-vault-accent" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium text-vault-text">YubiKey</span>
+                  {!webauthnAvailable()
+                    ? <span className="vault-badge-muted flex items-center gap-1"><XCircle className="w-2.5 h-2.5 text-vault-red" /> No WebAuthn here</span>
+                    : yubiRegistered
+                      ? <span className="vault-badge-green flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5" /> Registered</span>
+                      : <span className="vault-badge-muted">Not registered</span>}
+                  <span className="vault-badge-muted">FIDO2 PRF</span>
+                </div>
+                <p className="text-xs text-vault-muted mt-0.5">
+                  {walletAvailable === "none"
+                    ? "Needs a browser wallet too: the YubiKey protects secrets, the wallet signs transactions"
+                    : yubiRegistered
+                      ? "Touch your key to unlock — a browser wallet signs the on-chain writes"
+                      : "First use registers the key (set a FIDO2 PIN first) — "}
+                  {!yubiRegistered && walletAvailable !== "none" && (
+                    <a href={YUBIKEY_DOC} target="_blank" rel="noopener noreferrer" className="text-vault-accent hover:underline" onClick={(e) => e.stopPropagation()}>setup guide</a>
+                  )}
+                </p>
+              </div>
+              {connecting && <Loader2 className="w-4 h-4 text-vault-accent animate-spin shrink-0" />}
+            </div>
+          </button>
+          {yubiRegistered && (
+            <button onClick={() => { onForgetYubiKey(); setYubiRegistered(false); }} className="text-xs text-vault-muted hover:text-vault-text -mt-1 ml-1">
+              Use a different YubiKey (forget the registered one)
+            </button>
+          )}
         </div>
 
         {/* Footer links */}

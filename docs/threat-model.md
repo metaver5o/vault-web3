@@ -126,6 +126,8 @@ The envelope is public on IPFS and its integrity value is recorded on-chain. If 
 - **The Diamond owner key.** The owner can cut new facets, which changes contract logic. Put the owner behind a multisig and a timelock before production.
 - **Availability you don't pay for.** A CID that nobody pins can disappear from IPFS. Pin to at least two providers you control.
 - **Unaudited code.** Neither the contracts nor the crypto library have had an external audit.
+- **Losing a YubiKey.** With the YubiKey signer, each key derives its own KEKs and a secret is wrapped for one key only. A lost or reset key means the secrets it wrote are unrecoverable. See [yubikey.md](yubikey.md).
+- **Moving the vault to another domain (YubiKey).** WebAuthn credentials are bound to the site's domain; the same key on another domain derives different KEKs.
 
 ---
 

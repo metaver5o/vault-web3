@@ -2,7 +2,7 @@
 
 **Decentralized secrets vault with Trezor hardware root of trust.**
 
-Replaces HashiCorp Vault's seal/unseal mechanism with a Trezor hardware wallet.
+Replaces HashiCorp Vault's seal/unseal mechanism with a hardware key: a Trezor or a YubiKey.
 No central server. No root token. No cloud dependency.
 
 ## See it work
@@ -24,7 +24,7 @@ Tests and the end-to-end check, in the terminal:
 ## Architecture
 
 ```
-Trezor (KEK derivation from a signed message; MetaMask uses EIP-712)
+Trezor (KEK from a signed message) · YubiKey (KEK from FIDO2 PRF) · MetaMask (EIP-712)
   ↓
 AES-256-GCM (wrap DEK) + AES-256-GCM (encrypt payload) + HMAC integrity tag
   ↓
@@ -34,6 +34,16 @@ L2 Smart Contract (ERC-2535 Diamond: CID versioning + RBAC + audit log)
 ```
 
 See [docs/architecture.md](docs/architecture.md) for full diagrams.
+
+## Signers
+
+| Signer | Where the key lives | Unlock | Signs transactions |
+|---|---|---|---|
+| **Trezor** | Hardware wallet | Confirm on the device | Yes |
+| **YubiKey** | FIDO2 security key (PRF) | Touch + PIN | No, pair it with a browser wallet |
+| **MetaMask** | Browser extension | Wallet popup | Yes |
+
+Each signer derives its own keys: a secret is read with the same signer (and the same key) that wrote it. YubiKey setup and troubleshooting: [docs/yubikey.md](docs/yubikey.md).
 
 ## Quickstart
 

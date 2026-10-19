@@ -2,9 +2,10 @@
  * MetaMask signing backend for vault-web3.
  *
  * Works in any EIP-1193 browser environment (MetaMask, Rabby, Coinbase Wallet, etc).
- * Uses the same KEK derivation scheme as Trezor — HKDF-SHA256 over the EIP-712
- * signature — so encrypted envelopes are backend-agnostic. A secret written with
- * Trezor can be read with MetaMask if both control the same Ethereum private key.
+ * Uses the same HKDF-SHA256 step as Trezor, but over an EIP-712 typed-data
+ * signature, while the Trezor signs a plain message (EIP-191). The two signatures
+ * differ, so the KEKs differ: a secret written with one backend can only be read
+ * with the same backend and key.
  *
  * SECURITY NOTE vs Trezor:
  *   - MetaMask stores the private key in the browser extension's encrypted storage.
