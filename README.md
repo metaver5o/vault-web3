@@ -5,6 +5,8 @@
 Replaces HashiCorp Vault's seal/unseal mechanism with a hardware key: a Trezor or a YubiKey.
 No central server. No root token. No cloud dependency.
 
+**Try the UI:** [metaver5o.github.io/vault-web3](https://metaver5o.github.io/vault-web3/). It's only the client: everything runs in your browser, and you point it at your own chain and IPFS node in Settings. Trezor needs the vault running locally (see Quickstart); YubiKey and MetaMask work on the hosted page.
+
 ## See it work
 
 ![Write a secret, read it back, check the audit log](docs/media/ui-walkthrough.gif)

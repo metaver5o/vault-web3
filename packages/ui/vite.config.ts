@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig({
+  // GitHub Pages serves the app from /<repo>/; set VITE_BASE=/vault-web3/ for that build.
+  base: process.env.VITE_BASE ?? "/",
   plugins: [
     nodePolyfills({
       // Polyfill Node.js crypto used in @vault-web3/core

@@ -12,7 +12,10 @@ interface TrezorBridgeInfo {
   devices: Array<{ path: string; session?: string; type?: number; label?: string }>;
 }
 
-type BridgeStatus = "checking" | "unavailable" | "no-device" | "ready";
+type BridgeStatus = "checking" | "unavailable" | "no-device" | "ready" | "hosted";
+
+// Trezor Bridge only answers pages served from this machine (the dev server proxies it).
+const servedLocally = () => ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
 
 async function probeTrezorBridge(): Promise<TrezorBridgeInfo> {
   // Requests go through the Vite proxy (/trezor-bridge → localhost:21325)
@@ -36,6 +39,8 @@ function useTrezorBridge() {
 
   useEffect(() => {
     let cancelled = false;
+
+    if (!servedLocally()) { setStatus("hosted"); return; }
 
     async function check() {
       try {
@@ -192,6 +197,9 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, onConnectYubiK
                       <Loader2 className="w-2.5 h-2.5 animate-spin" /> Detecting…
                     </span>
                   )}
+                  {bridgeStatus === "hosted" && (
+                    <span className="vault-badge-muted">Local only</span>
+                  )}
                   {bridgeStatus === "unavailable" && (
                     <span className="vault-badge-muted flex items-center gap-1">
                       <XCircle className="w-2.5 h-2.5 text-vault-red" /> Bridge offline
@@ -243,6 +251,20 @@ export function ConnectPage({ onConnectMetaMask, onConnectTrezor, onConnectYubiK
                 {bridgeStatus === "checking" && (
                   <p className="text-xs text-vault-muted mt-0.5">
                     Probing localhost:21325…
+                  </p>
+                )}
+                {bridgeStatus === "hosted" && (
+                  <p className="text-xs text-vault-muted mt-0.5">
+                    Trezor needs the vault running on your machine:{" "}
+                    <a
+                      href="https://github.com/metaver5o/vault-web3#quickstart"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-vault-accent hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      run it locally
+                    </a>
                   </p>
                 )}
               </div>
