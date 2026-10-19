@@ -2,6 +2,7 @@
   "name": "@web3-vault/contracts",
   "version": "0.1.0",
   "description": "Vault-web3 smart contracts — ERC-2535 Diamond access control registry",
+  "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

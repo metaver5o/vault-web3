@@ -2,6 +2,7 @@
   "name": "@web3-vault/cli",
   "version": "0.1.0",
   "description": "vault-web3 CLI — HashiCorp Vault-compatible interface backed by Trezor",
+  "license": "MIT",
   "bin": {
     "vault-web3": "dist/index.js"
   },

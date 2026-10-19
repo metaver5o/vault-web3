@@ -2,6 +2,7 @@
   "name": "@web3-vault/core",
   "version": "0.1.0",
   "description": "Core cryptography, Trezor integration, and IPFS storage for vault-web3",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

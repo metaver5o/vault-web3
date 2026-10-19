@@ -2,6 +2,7 @@
   "name": "@web3-vault/api",
   "version": "0.1.0",
   "description": "HashiCorp Vault KV v2-compatible REST API for vault-web3",
+  "license": "MIT",
   "type": "module",
   "main": "dist/server.js",
   "scripts": {

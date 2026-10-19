@@ -2,6 +2,7 @@
   "name": "@web3-vault/ui",
   "version": "0.1.0",
   "description": "vault-web3 web UI — HashiCorp Vault-style dark interface",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
