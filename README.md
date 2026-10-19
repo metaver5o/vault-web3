@@ -5,6 +5,22 @@
 Replaces HashiCorp Vault's seal/unseal mechanism with a Trezor hardware wallet.
 No central server. No root token. No cloud dependency.
 
+## See it work
+
+![Write a secret, read it back, check the audit log](docs/media/ui-walkthrough.gif)
+
+The UI against a local chain and IPFS node: connect, encrypt and store, decrypt, audit. Recorded with a test wallet standing in for MetaMask; nothing here is mocked past the wallet.
+
+| Stored: IPFS CID and on-chain tx | Decrypted |
+|---|---|
+| ![Secret stored](docs/media/3-write-done.png) | ![Secret decrypted](docs/media/4-read-decrypted.png) |
+| **On-chain audit log** | **Path-scoped roles** |
+| ![Audit log](docs/media/6-audit.png) | ![Access control](docs/media/7-access.png) |
+
+Tests and the end-to-end check, in the terminal:
+
+![Core tests, contract tests and the end-to-end run](docs/media/e2e-run.gif)
+
 ## Architecture
 
 ```
