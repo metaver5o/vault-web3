@@ -17,6 +17,9 @@ import { getSelectors, FacetCutAction } from "./helpers/diamond";
 
 async function main() {
   const [deployer] = await ethers.getSigners();
+  if (!deployer) {
+    throw new Error(`No deployer account for ${network.name}. Set one with: npx hardhat vars set DEPLOYER_PRIVATE_KEY`);
+  }
   console.log("Deploying with:", deployer.address);
   console.log("Balance:", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "ETH");
 
@@ -74,15 +77,7 @@ async function main() {
   const receipt = await tx.wait(1);
   console.log("Diamond cut complete. Gas used:", receipt?.gasUsed.toString());
 
-  // 6. Verify
-  const loupe = await ethers.getContractAt("IDiamondLoupe", diamondAddress);
-  const registeredFacets = await loupe.facetAddresses();
-  console.log(`\nRegistered ${registeredFacets.length} facets:`);
-  for (const addr of registeredFacets) {
-    const selectors = await loupe.facetFunctionSelectors(addr);
-    console.log(`  ${addr}: ${selectors.length} functions`);
-  }
-
+  // 6. Record it before anything else can fail.
   const chainId = Number((await ethers.provider.getNetwork()).chainId);
   if (chainId !== 31337) {
     const file = path.join(__dirname, "../../ui/src/deployments.json");
@@ -96,6 +91,20 @@ async function main() {
     };
     fs.writeFileSync(file, JSON.stringify(all, null, 2) + "\n");
     console.log(`Recorded in ${path.relative(process.cwd(), file)}`);
+  }
+
+  // 7. Verify. Public RPCs balance across nodes that can lag a block or two behind,
+  // so a read right after the cut can miss it: retry before giving up.
+  const loupe = await ethers.getContractAt("IDiamondLoupe", diamondAddress);
+  let registeredFacets: string[] = [];
+  for (let i = 0; i < 10 && registeredFacets.length === 0; i++) {
+    try { registeredFacets = await loupe.facetAddresses(); } catch { await new Promise((r) => setTimeout(r, 3000)); }
+  }
+  if (registeredFacets.length === 0) console.warn("Couldn't read the facets back yet; check later with the loupe.");
+  console.log(`\nRegistered ${registeredFacets.length} facets:`);
+  for (const addr of registeredFacets) {
+    const selectors = await loupe.facetFunctionSelectors(addr);
+    console.log(`  ${addr}: ${selectors.length} functions`);
   }
 
   console.log("\n=== Deployment Complete ===");

@@ -1,1 +1,9 @@
-{}
+{
+  "84532": {
+    "network": "baseSepolia",
+    "registry": "0xe9a44e0F7C72844D7584bf75053e685eAA1e5384",
+    "owner": "0x76cb53C94D02193Fd6F5F979e7b79E38aD5FdB6B",
+    "block": 48348460,
+    "deployedAt": "2026-10-20T00:00:00.000Z"
+  }
+}
