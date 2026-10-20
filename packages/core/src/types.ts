@@ -124,12 +124,6 @@ export interface WriteSecretRequest {
   data: Record<string, string>;
   /** Optional: force a specific derivation index for the KEK */
   derivationIndex?: number;
-  /** Mix quantum entropy from QSHaaS into the DEK generation */
-  useQuantumSeed?: boolean;
-  /** QSHaaS API key (required when useQuantumSeed=true) */
-  qshaasApiKey?: string;
-  /** QSHaaS API base URL (defaults to https://api.criptografia.net) */
-  qshaasApiUrl?: string;
 }
 
 export interface ReadSecretResponse {

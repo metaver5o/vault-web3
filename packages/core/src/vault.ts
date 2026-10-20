@@ -21,7 +21,6 @@ import type {
 import type { VaultSigner } from "./signer.js";
 import { TrezorVault } from "./trezor.js";
 import { encryptSecret, decryptSecret } from "./crypto.js";
-import { fetchQuantumEntropy } from "./qshaas.js";
 import { IPFSClient } from "./ipfs.js";
 import { VaultRegistry } from "./registry.js";
 
@@ -75,38 +74,23 @@ export class VaultClient {
    *   4. Record CID + version on-chain (second Trezor confirmation for tx signing)
    */
   async write(req: WriteSecretRequest): Promise<SecretMetadataResult> {
-    const { path, data, derivationIndex = 0, useQuantumSeed, qshaasApiKey, qshaasApiUrl } = req;
+    const { path, data, derivationIndex = 0 } = req;
 
-    // Step 1: Optionally fetch quantum entropy (non-blocking — failure falls back to CSPRNG)
-    let quantumEntropy: Uint8Array | undefined;
-    let quantumJobId: string | undefined;
-    if (useQuantumSeed && qshaasApiKey) {
-      const qe = await fetchQuantumEntropy({
-        apiUrl: qshaasApiUrl ?? "https://api.criptografia.net",
-        apiKey: qshaasApiKey,
-      });
-      if (qe) {
-        quantumEntropy = qe.bytes;
-        quantumJobId = qe.jobId;
-      }
-    }
-
-    // Step 2: Derive KEK — requires signer confirmation (Trezor button / MetaMask popup)
+    // Step 1: Derive KEK — requires signer confirmation (Trezor button / MetaMask popup)
     const derivedKeys = await this.signer.deriveKEK(path, derivationIndex);
     const derivationPath = `m/44'/60'/${this.config.accountIndex}'/0/0`;
 
-    // Step 3: Encrypt (with optional quantum DEK mixing)
+    // Step 2: Encrypt
     const envelope = await encryptSecret(
-      data, derivedKeys, derivationPath, this.config.chainId, quantumEntropy, path
+      data, derivedKeys, derivationPath, this.config.chainId
     );
     // Zero sensitive material
     derivedKeys.kekRaw.fill(0);
-    if (quantumEntropy) quantumEntropy.fill(0);
 
-    // Step 4: Store on IPFS
+    // Step 3: Store on IPFS
     const pinResult = await this.ipfs.storeEnvelope(envelope);
 
-    // Step 5: Record on-chain — requires second signer confirmation
+    // Step 4: Record on-chain — requires second signer confirmation
     const signedRegistry = await this.getSignedRegistry();
     const receipt = await signedRegistry.recordVersion(
       path,
@@ -126,7 +110,6 @@ export class VaultClient {
       cid: pinResult.cid,
       txHash: receipt.hash,
       timestamp: Date.now(),
-      quantumJobId,
     };
   }
 
@@ -279,5 +262,4 @@ export interface SecretMetadataResult {
   cid: string;
   txHash: string;
   timestamp: number;
-  quantumJobId?: string;
 }

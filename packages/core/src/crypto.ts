@@ -180,28 +180,8 @@ async function aesGcmDecrypt(
 
 // ─── DEK Generation ───────────────────────────────────────────────────────────
 
-async function generateDEK(
-  quantumEntropy?: Uint8Array,
-  namespace?: string
-): Promise<CryptoKey> {
-  const csprngKey = await subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true,
-    ["encrypt", "decrypt"]
-  );
-
-  if (!quantumEntropy || !namespace) return csprngKey;
-
-  const csprngRaw = new Uint8Array(await subtle.exportKey("raw", csprngKey));
-  const qSalt = await sha256(utf8(namespace));
-  const qExpanded = await hkdfSHA256(quantumEntropy, qSalt, "vault-web3-dek-qseed", 32);
-
-  const mixed = new Uint8Array(32);
-  for (let i = 0; i < 32; i++) mixed[i] = csprngRaw[i] ^ qExpanded[i];
-  zeroFill(csprngRaw);
-  zeroFill(qExpanded);
-
-  return subtle.importKey("raw", ab(mixed), { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+async function generateDEK(): Promise<CryptoKey> {
+  return subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 }
 
 // ─── Envelope Encrypt / Decrypt ───────────────────────────────────────────────
@@ -220,14 +200,12 @@ export async function encryptSecret(
   plaintext: Record<string, string>,
   derivedKeys: DerivedKeys,
   derivationPath: string,
-  chainId: number,
-  quantumEntropy?: Uint8Array,
-  namespace?: string
+  chainId: number
 ): Promise<EncryptedEnvelope> {
   const plaintextBytes = utf8(JSON.stringify(plaintext));
 
   // 1. Generate DEK
-  const dek = await generateDEK(quantumEntropy, namespace);
+  const dek = await generateDEK();
   const dekRaw = new Uint8Array(await subtle.exportKey("raw", dek));
 
   // 2. Encrypt payload with AES-256-GCM (using raw DEK bytes as key)

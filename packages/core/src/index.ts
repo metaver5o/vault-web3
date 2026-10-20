@@ -3,7 +3,6 @@ export * from "./signer.js";
 export * from "./trezor.js";
 export * from "./metamask.js";
 export * from "./yubikey.js";
-export * from "./qshaas.js";
 export * from "./crypto.js";
 export * from "./ipfs.js";
 export * from "./registry.js";
