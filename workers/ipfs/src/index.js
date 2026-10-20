@@ -10,6 +10,8 @@
  *
  * Secrets (wrangler secret put): PINATA_JWT
  * Vars (wrangler.toml): ALLOWED_ORIGINS, GATEWAY, MAX_BYTES
+ * KV (wrangler.toml): ENVELOPES, a copy of every envelope added here. Public IPFS
+ * gateways rate-limit or refuse requests from Workers, so reads come from KV first.
  */
 
 const PEER_ID = "12D3KooWRyQjCT4aej3Li2cr9MGH31rr3PU93sztV2qz8Txyh2Tf"; // identifier only; there is no libp2p node
@@ -78,6 +80,7 @@ async function add(request, env, cors) {
   });
   if (!res.ok) return json({ Message: `pinning failed (${res.status})` }, 502, cors);
   const { IpfsHash } = await res.json();
+  if (env.ENVELOPES) await env.ENVELOPES.put(IpfsHash, bytes);   // content-addressed: never overwritten with different bytes
   // Kubo answers add with one NDJSON line per file.
   return new Response(JSON.stringify({ Name: "envelope.json", Hash: IpfsHash, Size: String(bytes.length) }) + "\n",
     { headers: { ...cors, "content-type": "application/x-ndjson" } });
@@ -90,6 +93,10 @@ async function cat(url, env, ctx, cors) {
   const cache = caches.default;
   const key = new Request(`https://cache.vault-web3/${cid}`);
   let res = await cache.match(key);
+  if (!res && env.ENVELOPES) {
+    const stored = await env.ENVELOPES.get(cid, "arrayBuffer");
+    if (stored) res = new Response(stored);
+  }
   if (!res) {
     const gateways = [env.GATEWAY, "https://gateway.pinata.cloud", "https://ipfs.io"].filter(Boolean);
     for (const g of gateways) {

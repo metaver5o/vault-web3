@@ -16,3 +16,9 @@ MAX_BYTES = "65536"
 name = "ADD_LIMIT"
 namespace_id = "1001"
 simple = { limit = 20, period = 60 }
+
+# A copy of every envelope added here. Public gateways refuse or rate-limit Workers,
+# so reads come from KV first. Create with: npx wrangler kv namespace create ENVELOPES
+[[kv_namespaces]]
+binding = "ENVELOPES"
+id = "836633f53b4f4d118e742db7646e74f7"
