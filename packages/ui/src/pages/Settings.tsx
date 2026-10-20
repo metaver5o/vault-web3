@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { Settings as SettingsIcon, CheckCircle, ExternalLink, Wifi, WifiOff, AlertCircle } from "lucide-react";
-import { QuantumSeedField } from "../components/QuantumSeedField.tsx";
+import { Settings as SettingsIcon, CheckCircle, AlertCircle } from "lucide-react";
 import { loadConfig, saveConfig, type UIConfig } from "../store/config.ts";
-import { checkQSHaaSStatus } from "@vault-web3/core";
 
 export function SettingsPage() {
   const [cfg, setCfg] = useState<UIConfig>(loadConfig);
   const [saved, setSaved] = useState(false);
-  const [qsStatus, setQsStatus] = useState<"idle" | "checking" | "online" | "offline">("idle");
 
   function update(key: keyof UIConfig, value: unknown) {
     setCfg((c) => ({ ...c, [key]: value }));
@@ -17,15 +14,6 @@ export function SettingsPage() {
     saveConfig({ ...cfg, networkMode: "custom" });   // hand-edited values win over the wallet's network
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  }
-
-  async function testQSHaaS() {
-    setQsStatus("checking");
-    const result = await checkQSHaaSStatus({
-      apiUrl: cfg.qshaasApiUrl,
-      apiKey: cfg.qshaasApiKey,
-    });
-    setQsStatus(result.online ? "online" : "offline");
   }
 
   return (
@@ -94,42 +82,6 @@ export function SettingsPage() {
           </div>
         </section>
 
-        {/* Quantum Seed */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-vault-muted uppercase tracking-wider">
-              Quantum Seed (QSHaaS)
-            </h3>
-            <a href="https://criptografia.net" target="_blank" rel="noopener noreferrer"
-              className="text-xs text-vault-accent hover:underline flex items-center gap-1">
-              Get API key <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-          <QuantumSeedField
-            enabled={cfg.useQuantumSeedByDefault}
-            apiKey={cfg.qshaasApiKey}
-            apiUrl={cfg.qshaasApiUrl}
-            onToggle={(v) => update("useQuantumSeedByDefault", v)}
-            onApiKeyChange={(v) => update("qshaasApiKey", v)}
-            onApiUrlChange={(v) => update("qshaasApiUrl", v)}
-            showUrlField
-          />
-          <button
-            onClick={testQSHaaS}
-            disabled={qsStatus === "checking"}
-            className="vault-btn-secondary text-sm"
-          >
-            {qsStatus === "checking" ? (
-              <><Wifi className="w-4 h-4 animate-pulse" /> Testing…</>
-            ) : qsStatus === "online" ? (
-              <><Wifi className="w-4 h-4 text-vault-green" /> Connected</>
-            ) : qsStatus === "offline" ? (
-              <><WifiOff className="w-4 h-4 text-vault-red" /> Unreachable</>
-            ) : (
-              <><Wifi className="w-4 h-4" /> Test Connection</>
-            )}
-          </button>
-        </section>
 
         {/* Save */}
         <button onClick={save} className="vault-btn-primary w-full justify-center py-2.5">

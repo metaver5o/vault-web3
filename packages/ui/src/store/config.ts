@@ -15,9 +15,6 @@ export interface UIConfig {
   ipfsApiUrl: string;
   accountIndex: number;
   defaultNamespace: string;
-  qshaasApiKey: string;
-  qshaasApiUrl: string;
-  useQuantumSeedByDefault: boolean;
 }
 
 const DEFAULTS: UIConfig = {
@@ -29,9 +26,6 @@ const DEFAULTS: UIConfig = {
   ipfsApiUrl: "http://localhost:5001",
   accountIndex: 0,
   defaultNamespace: "secret",
-  qshaasApiKey: "",
-  qshaasApiUrl: "https://api.criptografia.net",
-  useQuantumSeedByDefault: false,
 };
 
 const KEY = "vault-web3-config";

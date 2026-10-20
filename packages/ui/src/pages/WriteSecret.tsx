@@ -5,8 +5,7 @@ import {
   ArrowLeft, Loader2, Copy, Settings
 } from "lucide-react";
 import type { VaultClient } from "@vault-web3/core";
-import { QuantumSeedField } from "../components/QuantumSeedField.tsx";
-import { loadConfig, patchConfig } from "../store/config.ts";
+import { loadConfig } from "../store/config.ts";
 
 interface WriteSecretProps {
   vault: VaultClient | null;
@@ -29,11 +28,9 @@ export function WriteSecretPage({ vault }: WriteSecretProps) {
   const [pairs, setPairs] = useState<KVPair[]>([
     { id: nextId++, key: "", value: "", hidden: true },
   ]);
-  const [useQuantum, setUseQuantum] = useState(cfg.useQuantumSeedByDefault);
-  const [qshaasKey, setQshaasKey] = useState(cfg.qshaasApiKey);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
-    version: number; cid: string; txHash: string; quantumJobId?: string;
+    version: number; cid: string; txHash: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,18 +58,12 @@ export function WriteSecretPage({ vault }: WriteSecretProps) {
     }
     if (Object.keys(data).length === 0) return setError("At least one key=value pair required");
 
-    // Persist QSHaaS config
-    patchConfig({ qshaasApiKey: qshaasKey, useQuantumSeedByDefault: useQuantum });
-
     setSubmitting(true);
     setError(null);
     try {
       const res = await vault.write({
         path: path.trim(),
         data,
-        useQuantumSeed: useQuantum,
-        qshaasApiKey: qshaasKey || undefined,
-        qshaasApiUrl: cfg.qshaasApiUrl,
       });
       setResult(res);
 
@@ -101,17 +92,7 @@ export function WriteSecretPage({ vault }: WriteSecretProps) {
             <Row label="Version" value={`v${result.version}`} />
             <Row label="CID" value={result.cid} copyable />
             <Row label="Tx" value={result.txHash} copyable />
-            {result.quantumJobId && (
-              <Row label="Quantum Job" value={result.quantumJobId} />
-            )}
           </div>
-
-          {result.quantumJobId && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded bg-vault-purple/10 border border-vault-purple/20 text-xs text-vault-purple">
-              <span>⚛</span>
-              DEK mixed with quantum entropy from QSHaaS
-            </div>
-          )}
 
           <div className="flex gap-3">
             <button onClick={() => setResult(null)} className="vault-btn-secondary flex-1">
@@ -217,15 +198,6 @@ export function WriteSecretPage({ vault }: WriteSecretProps) {
             ))}
           </div>
         </div>
-
-        {/* Quantum Seed */}
-        <QuantumSeedField
-          enabled={useQuantum}
-          apiKey={qshaasKey}
-          apiUrl={cfg.qshaasApiUrl}
-          onToggle={setUseQuantum}
-          onApiKeyChange={setQshaasKey}
-        />
 
         {/* Error */}
         {error && (
