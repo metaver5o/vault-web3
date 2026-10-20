@@ -24,14 +24,16 @@ class SoftwareSigner {   // stands in for TrezorVault: same message, same signat
   async getEthersSigner() { return this.tx; }   // one nonce counter per account across writes
 }
 
-const config = { trezorManifest: { email: 'e2e@example.com', appUrl: 'http://localhost' }, ipfsApiUrl: IPFS, rpcUrl: RPC, registryAddress: REGISTRY, chainId: 31337, accountIndex: 0 };
-const owner = new SoftwareSigner('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');   // Hardhat test account #0
-const stranger = new SoftwareSigner('0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'); // Hardhat test account #1
+const config = { trezorManifest: { email: 'e2e@example.com', appUrl: 'http://localhost' }, ipfsApiUrl: IPFS, rpcUrl: RPC, registryAddress: REGISTRY, chainId: Number(process.env.CHAIN_ID || 31337), accountIndex: 0 };
+// Defaults are Hardhat's public test accounts. On a public chain, pass a funded OWNER_KEY;
+// the stranger can be any key (an unfunded one still can't read or write).
+const owner = new SoftwareSigner(process.env.OWNER_KEY || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');   // Hardhat test account #0
+const stranger = new SoftwareSigner(process.env.STRANGER_KEY || '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'); // Hardhat test account #1
 const vault = new VaultClient(config, owner);
 const path = `prod/db/credentials-${Date.now().toString(36)}`;   // fresh path, so the run can be repeated on the same chain
 const secret = { username: 'app', password: 'S3cure-' + ethers.hexlify(ethers.randomBytes(8)).slice(2) };
 
-console.log(C.h('\nvault-web3 · end-to-end on a local chain + IPFS node'));
+console.log(C.h(`\nvault-web3 · end-to-end on ${RPC.includes('127.0.0.1') ? 'a local chain + IPFS node' : RPC + ' + ' + IPFS}`));
 console.log(C.dim('signer: software key standing in for the Trezor (same EIP-191 message)\n'));
 
 const health = await vault.healthCheck();

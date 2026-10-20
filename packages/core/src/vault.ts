@@ -25,12 +25,18 @@ import { fetchQuantumEntropy } from "./qshaas.js";
 import { IPFSClient } from "./ipfs.js";
 import { VaultRegistry } from "./registry.js";
 
+const RECORDED = new ethers.Interface([
+  "event SecretVersionRecorded(string indexed pathIndexed, string path, uint256 version, string cid, address author, uint256 timestamp)",
+]);
+
 export class VaultClient {
   private signer: VaultSigner;
   private ipfs: IPFSClient;
   private registry: VaultRegistry;
   private provider: ethers.JsonRpcProvider;
   private config: VaultConfig;
+  /** Latest version this client wrote per path, so reads can wait for a lagging RPC node. */
+  private written = new Map<string, number>();
 
   /**
    * @param config    Vault configuration
@@ -108,7 +114,12 @@ export class VaultClient {
       envelope.plaintextHash
     );
 
-    const version = Number(await this.registry.getLatestVersion(path));
+    // Take the version from the receipt: a fresh read can hit an RPC node that is a block behind.
+    const event = receipt.logs
+      .map((log) => { try { return RECORDED.parseLog(log); } catch { return null; } })
+      .find((e) => e?.name === "SecretVersionRecorded");
+    const version = event ? Number(event.args.version) : Number(await this.registry.getLatestVersion(path));
+    this.written.set(path, Math.max(version, this.written.get(path) ?? 0));
     return {
       path,
       version,
@@ -120,6 +131,20 @@ export class VaultClient {
   }
 
   // ─── Read ───────────────────────────────────────────────────────────────────
+
+  /**
+   * Latest version on-chain. Public RPCs balance across nodes that can lag a block
+   * or two, so if this client just wrote a newer version, wait for the node to catch up.
+   */
+  private async latestVersion(path: SecretPath): Promise<number> {
+    const expected = this.written.get(path) ?? 0;
+    let latest = Number(await this.registry.getLatestVersion(path));
+    for (let i = 0; latest < expected && i < 15; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      latest = Number(await this.registry.getLatestVersion(path));
+    }
+    return latest;
+  }
 
   /**
    * Read and decrypt a secret.
@@ -136,7 +161,7 @@ export class VaultClient {
     if (version !== undefined) {
       versionEntry = await this.registry.getVersionEntry(path, version);
     } else {
-      const latestVersion = Number(await this.registry.getLatestVersion(path));
+      const latestVersion = await this.latestVersion(path);
       if (latestVersion === 0) {
         throw new Error(`Secret not found: ${path}`);
       }
@@ -181,6 +206,7 @@ export class VaultClient {
   // ─── Version History ────────────────────────────────────────────────────────
 
   async listVersions(path: SecretPath): Promise<SecretVersionEntry[]> {
+    await this.latestVersion(path);   // wait until the node has this client's own writes
     return this.registry.getVersionHistory(path);
   }
 
