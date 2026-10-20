@@ -12,11 +12,13 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ address, signerType, chainId }: StatusBarProps) {
-  const [qsStatus, setQsStatus] = useState<"checking" | "online" | "offline">("checking");
+  // null: no QSHaaS key configured, so the indicator stays hidden.
+  const [qsStatus, setQsStatus] = useState<"checking" | "online" | "offline" | null>(null);
 
   useEffect(() => {
     const cfg = loadConfig();
-    if (!cfg.qshaasApiKey) { setQsStatus("offline"); return; }
+    if (!cfg.qshaasApiKey) return;
+    setQsStatus("checking");
     checkQSHaaSStatus({ apiUrl: cfg.qshaasApiUrl, apiKey: cfg.qshaasApiKey })
       .then((s) => setQsStatus(s.online ? "online" : "offline"))
       .catch(() => setQsStatus("offline"));
@@ -40,14 +42,14 @@ export function StatusBar({ address, signerType, chainId }: StatusBarProps) {
 
       <span className="flex-1" />
 
-      {/* QSHaaS status */}
-      <span className={clsx(
+      {/* QSHaaS status, only when a key is configured */}
+      {qsStatus && <span className={clsx(
         "flex items-center gap-1.5 transition-colors",
         qsStatus === "online" ? "text-vault-purple" : "text-vault-muted"
       )}>
         {qsStatus === "online" ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
         QSHaaS {qsStatus === "online" ? "online" : qsStatus === "offline" ? "offline" : "…"}
-      </span>
+      </span>}
     </div>
   );
 }
